@@ -148,6 +148,7 @@ def printPieces():
     print("\t", piece)
 
 players=[]
+player = None
     
 random.shuffle(players)
 print("Order:", players)
