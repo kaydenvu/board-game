@@ -55,7 +55,7 @@ diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
 screenWidth = 500
 screenHeight = 500
-screen = pygame.display.set_mode((screenWidth, screenHeight), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((screenWidth, screenHeight))
 V = pygame.Vector2
 
 pygame.display.set_caption("Monopoly")
@@ -104,7 +104,7 @@ class Button(pygame.sprite.Sprite):
       global diceRolling
       if self.draw():
         diceRolling = True
-        pygame.time.set_timer(rollingDice, 500)
+        pygame.time.set_timer(rollingDice, Die.rollTime)
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -153,6 +153,7 @@ random.shuffle(players)
 print("Order:", players)
 
 class Die():
+  rollTime=150
   def __init__(self, pos):
     self.pos = V(pos)
     self.value = 0
@@ -165,12 +166,13 @@ class Die():
     self.stopDieValue = random.randint(1,10)
   def draw(self):
     self.image = self.images[self.value - 1]
+    self.image = pygame.transform.smoothscale(self.image, (175, 175))
     self.rect = self.image.get_rect(center = self.pos)
     screen.blit(self.image, self.rect)
 
 die1 = Die((170, 170))
 die2 = Die((330, 330))
-rollButton = Button(roll, V(250, 450), 0.5, "roll dice")
+rollButton = Button(roll, V(215, 215), 0.5, "roll dice")
 
 def diceRoll():
   return (random.randint(1,6), random.randint(1,6))
@@ -203,6 +205,8 @@ def updateBoard():
   if diceRolling:
     die1.draw()
     die2.draw()
+  else:
+    rollButton.update()
   pygame.display.update()
   
 GameRunning=True
@@ -224,14 +228,23 @@ while GameRunning:
       GameRunning = False
     if event.type == rollingDice:
       die1.roll()
-      die2.roll()
-      print(die1.stopDieValue, die2.stopDieValue)
-      print(die1.value, die2.value)
-      if die1.stopDieValue == die2.stopDieValue:
+      die2.roll() 
+      if die1.stopDieValue == die2.stopDieValue and diceRolling:
+        die1.draw()
+        die2.draw()
+        pygame.display.update()
+        pygame.time.wait(500)
         pygame.time.set_timer(rollingDice, 0)
         diceRolling = False
-      else:
-        pygame.time.set_timer(rollingDice, 500)
+        rollButton.clicked = False
+        move(player, die1.value+die2.value)
+        print(die1.value, die2.value)
+        if turn < len(players)-1:
+          turn+=1
+        else:
+          turn = 0
+      elif diceRolling:
+        pygame.time.set_timer(rollingDice, Die.rollTime)
   if gameState == STATE.START_NUM_PLAYERS:
     screen.fill("white")
     drawText("Pick the number of players", V(250,25))
@@ -243,19 +256,6 @@ while GameRunning:
     PlayerPiecesUI.update()
   if gameState == STATE.PLAY:
     updateBoard()    
-    # for player in players:
-    #   print(player)
-    #   input("Press enter to roll the dice.")
-    #   roll = diceRoll()
-    #   print("You rolled a", roll[0], "and a", roll[1])
-    #   player.position = move(player, roll[0]+roll[1])
-    #   print("You moved to:", board[player.position])
-    #   if board[player.position].isOwned:
-    #     print("You landed on", board[player.position].owner+"'s", board[player.position].name)
-    #   updateBoard()
     player = players[turn]
-    if not diceRolling:
-      #displayRoll()
-      rollButton.update()  
   pygame.display.update()
     
