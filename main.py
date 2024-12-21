@@ -200,7 +200,10 @@ def printBoard():
       print()
 
 def updateBoard():
+  global player
   screen.blit(boardImage,(0,0))
+  if len(players)>=1:
+    drawText(player.piece.name,V(440,0))
   for player in players:
     screen.blit(player.piece.image, board[player.position].position)
   if diceRolling:
