@@ -203,7 +203,7 @@ def updateBoard():
   global player
   screen.blit(boardImage,(0,0))
   if len(players)>=1:
-    drawText(player.piece.name,V(440,0))
+    drawText(player.piece.name,V(350,100))
   for player in players:
     screen.blit(player.piece.image, board[player.position].position)
   if diceRolling:
@@ -242,7 +242,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         move(player, die1.value+die2.value)
-        print(die1.value, die2.value)
+        print(player.piece.name, die1.value, die2.value)
         if turn < len(players)-1:
           turn+=1
         else:
@@ -259,7 +259,8 @@ while GameRunning:
     drawText("Pick the pieces", V(250,75))
     PlayerPiecesUI.update()
   if gameState == STATE.PLAY:
-    updateBoard()    
+    player = players[turn]
+    updateBoard()
     player = players[turn]
   pygame.display.update()
     
