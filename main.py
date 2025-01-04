@@ -3,9 +3,6 @@ import pygame
 from tiles import board
 from enum import Enum
 
-# https://www.zpag.net/Jeux/list_of_all_monopoly_Chance_Community_Chest.html
-# Go make the Community Chest & Chance cards class + create cards
-
 pygame.init()
 
 pieceSize = 50
@@ -67,6 +64,7 @@ PlayerPiecesUI = pygame.sprite.Group()
 BoardDisplay = pygame.sprite.Group()
 
 class Button(pygame.sprite.Sprite):
+  mouseDown = False
   def __init__(self, image, pos, scale, actionType, value = None, *groups):
     super().__init__(*groups)
     width = image.get_width()
@@ -83,6 +81,7 @@ class Button(pygame.sprite.Sprite):
     if self.rect.collidepoint(pos) and pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
         self.clicked = True
         action = True
+        Button.mouseDown = True
     screen.blit(self.image, self.rect)
     return action
   def update(self):
@@ -90,6 +89,7 @@ class Button(pygame.sprite.Sprite):
     if self.actionType == "num players":
       if self.draw():
         playerAmount = self.value
+      if self.clicked and not Button.mouseDown:
         gameState = STATE.START_PIECES
     if self.actionType == "players pieces":
       if self.draw():
@@ -104,7 +104,7 @@ class Button(pygame.sprite.Sprite):
       global diceRolling
       if self.draw():
         diceRolling = True
-        pygame.time.set_timer(rollingDice, Die.rollTime)
+        pygame.time.set_timer(rollingDice, Die.rollTime)      
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -200,10 +200,14 @@ def printBoard():
       print()
 
 def updateBoard():
-  global player
+  global player, gameState
   screen.blit(boardImage,(0,0))
   if len(players)>=1:
+    lastTurn = turn - 1
+    lastPlayer = players[lastTurn]
     drawText(player.piece.name,V(350,100))
+    drawText(lastPlayer.piece.name + " landed on ", (250, 250))
+    drawText(board[lastPlayer.position].name, (250, 300))
   for player in players:
     screen.blit(player.piece.image, board[player.position].position)
   if diceRolling:
@@ -219,7 +223,8 @@ class STATE(Enum):
   START_NUM_PLAYERS = 0
   START_PIECES = 1
   PLAY = 2
-  END = 3
+  PLAY_CHOOSE = 3
+  END = 4
 
 gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
@@ -228,6 +233,8 @@ turn = 0
 
 while GameRunning:
   for event in pygame.event.get():
+    if event.type == pygame.MOUSEBUTTONUP:
+        Button.mouseDown = False
     if event.type == pygame.QUIT:
       GameRunning = False
     if event.type == rollingDice:
@@ -242,7 +249,8 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         move(player, die1.value+die2.value)
-        print(player.piece.name, die1.value, die2.value)
+        print(player.piece.name, die1.value, die2.value, board[player.position].name)
+        updateBoard()
         if turn < len(players)-1:
           turn+=1
         else:
@@ -258,6 +266,7 @@ while GameRunning:
     screen.fill("white")
     drawText("Pick the pieces", V(250,75))
     PlayerPiecesUI.update()
+    random.shuffle(players)
   if gameState == STATE.PLAY:
     player = players[turn]
     updateBoard()
