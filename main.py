@@ -219,7 +219,7 @@ def updateBoard():
   if diceRolling:
     die1.draw()
     die2.draw()
-  elif gameState == STATE.PLAY: 
+  elif gameState == STATE.PLAY:
     rollButton.update()
   elif gameState == STATE.PLAY_CHOOSE:
     buyButton.update()
@@ -227,7 +227,7 @@ def updateBoard():
   pygame.display.update()
   
 GameRunning=True
-firstTurn=True
+firstTurn = True
 
 class STATE(Enum):
   START_NUM_PLAYERS = 0
@@ -258,7 +258,7 @@ while GameRunning:
         pygame.time.set_timer(rollingDice, 0)
         diceRolling = False
         rollButton.clicked = False
-        firstTurn=False
+        firstTurn = False
         move(player, die1.value+die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         updateBoard()
