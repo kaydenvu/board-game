@@ -3,6 +3,8 @@ import pygame
 from tiles import board
 from enum import Enum
 
+# figure out git configs to work properly
+
 pygame.init()
 
 pieceSize = 50
