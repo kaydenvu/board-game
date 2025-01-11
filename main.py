@@ -204,7 +204,7 @@ def printBoard():
 def updateBoard():
   global player, gameState
   screen.blit(boardImage,(0,0))
-  if len(players)>=1:
+  if len(players)>=1 and not firstTurn:
     lastTurn = turn - 1
     lastPlayer = players[lastTurn]
     drawText(player.piece.name,V(350,100))
@@ -215,11 +215,12 @@ def updateBoard():
   if diceRolling:
     die1.draw()
     die2.draw()
-  else:
+  elif gameState == STATE.PLAY:
     rollButton.update()
   pygame.display.update()
   
 GameRunning=True
+firstTurn = True
 
 class STATE(Enum):
   START_NUM_PLAYERS = 0
@@ -250,9 +251,11 @@ while GameRunning:
         pygame.time.set_timer(rollingDice, 0)
         diceRolling = False
         rollButton.clicked = False
+        firstTurn = False
         move(player, die1.value+die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         updateBoard()
+        gameState = STATE.PLAY_CHOOSE
         if turn < len(players)-1:
           turn+=1
         else:
@@ -273,5 +276,8 @@ while GameRunning:
     player = players[turn]
     updateBoard()
     player = players[turn]
+  if gameState == STATE.PLAY_CHOOSE:
+    updateBoard()
+
   pygame.display.update()
     
