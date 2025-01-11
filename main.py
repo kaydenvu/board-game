@@ -51,6 +51,7 @@ dice6 = pygame.image.load("dice/6.png")
 roll = pygame.image.load("roll.png")
 buy = pygame.image.load("Buy button.png")
 skip = pygame.image.load("Skip button.png")
+confirm = pygame.image.load("Confirm Button.png")
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
@@ -108,7 +109,13 @@ class Button(pygame.sprite.Sprite):
       global diceRolling
       if self.draw():
         diceRolling = True
-        pygame.time.set_timer(rollingDice, Die.rollTime)      
+        pygame.time.set_timer(rollingDice, Die.rollTime)  
+    if self.actionType == "buy":
+      self.draw()
+    if self.actionType == "skip":
+      self.draw()    
+    if self.actionType == "confirm":
+      self.draw()
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -178,8 +185,9 @@ class Die():
 die1 = Die((170, 170))
 die2 = Die((330, 330))
 rollButton = Button(roll, V(215, 215), 0.5, "roll dice")
-buyButton = Button(buy,V(150,200), 0.5, "buy")
+buyButton = Button(buy,V(125,200), 0.5, "buy")
 skipButton = Button(skip, V(300, 200), 0.5, "skip")
+confirmButton = Button(confirm, V(215,200), 0.5, "confirm")
 
 def diceRoll():
   return (random.randint(1,6), random.randint(1,6))
@@ -211,7 +219,8 @@ def updateBoard():
   if len(players)>=1 and not firstTurn:
     lastTurn = turn - 1
     lastPlayer = players[lastTurn]
-    drawText(player.piece.name,V(350,100))
+    drawText(lastPlayer.piece.name,V(350,100))
+    drawText("$" + str(lastPlayer.money), V(350, 150))
     drawText(lastPlayer.piece.name + " landed on ", (250, 350))
     drawText(board[lastPlayer.position].name, (250, 400))
   for player in players:
@@ -285,6 +294,5 @@ while GameRunning:
     player = players[turn]
   if gameState == STATE.PLAY_CHOOSE:
     updateBoard()
-
   pygame.display.update()
     
