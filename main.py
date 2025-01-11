@@ -49,6 +49,8 @@ dice4 = pygame.image.load("dice/4.png")
 dice5 = pygame.image.load("dice/5.png")
 dice6 = pygame.image.load("dice/6.png")
 roll = pygame.image.load("roll.png")
+buy = pygame.image.load("Buy button.png")
+skip = pygame.image.load("Skip button.png")
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
@@ -176,6 +178,8 @@ class Die():
 die1 = Die((170, 170))
 die2 = Die((330, 330))
 rollButton = Button(roll, V(215, 215), 0.5, "roll dice")
+buyButton = Button(buy,V(150,200), 0.5, "buy")
+skipButton = Button(skip, V(300, 200), 0.5, "skip")
 
 def diceRoll():
   return (random.randint(1,6), random.randint(1,6))
@@ -204,22 +208,26 @@ def printBoard():
 def updateBoard():
   global player, gameState
   screen.blit(boardImage,(0,0))
-  if len(players)>=1:
+  if len(players)>=1 and not firstTurn:
     lastTurn = turn - 1
     lastPlayer = players[lastTurn]
     drawText(player.piece.name,V(350,100))
-    drawText(lastPlayer.piece.name + " landed on ", (250, 250))
-    drawText(board[lastPlayer.position].name, (250, 300))
+    drawText(lastPlayer.piece.name + " landed on ", (250, 350))
+    drawText(board[lastPlayer.position].name, (250, 400))
   for player in players:
     screen.blit(player.piece.image, board[player.position].position)
   if diceRolling:
     die1.draw()
     die2.draw()
-  else:
+  elif gameState == STATE.PLAY: 
     rollButton.update()
+  elif gameState == STATE.PLAY_CHOOSE:
+    buyButton.update()
+    skipButton.update()
   pygame.display.update()
   
 GameRunning=True
+firstTurn=True
 
 class STATE(Enum):
   START_NUM_PLAYERS = 0
@@ -250,9 +258,11 @@ while GameRunning:
         pygame.time.set_timer(rollingDice, 0)
         diceRolling = False
         rollButton.clicked = False
+        firstTurn=False
         move(player, die1.value+die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         updateBoard()
+        gameState = STATE.PLAY_CHOOSE
         if turn < len(players)-1:
           turn+=1
         else:
@@ -273,5 +283,8 @@ while GameRunning:
     player = players[turn]
     updateBoard()
     player = players[turn]
+  if gameState == STATE.PLAY_CHOOSE:
+    updateBoard()
+
   pygame.display.update()
     
