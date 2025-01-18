@@ -204,6 +204,7 @@ tile = board[0]
 random.shuffle(players)
 print("Order:", players)
 
+
 class Die():
   rollTime=150
   def __init__(self, pos):
@@ -229,6 +230,8 @@ buyButton = Button(buy, V(125,200), 0.5, "buy")
 skipButton = Button(skip, V(300, 200), 0.5, "skip")
 confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
 payButton = Button(pay, V(300,215), 0.5, "pay")
+
+rollDoubles = False
 
 def diceRoll():
   return (random.randint(1,6), random.randint(1,6))
@@ -338,6 +341,7 @@ while GameRunning:
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         updateBoard()
         gameState = STATE.PLAY_CHOOSE
+        # do double skip turn here
         if turn < len(players)-1:
           turn+=1
         else:
