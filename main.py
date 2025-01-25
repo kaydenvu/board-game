@@ -1,6 +1,7 @@
 import random
 import pygame
 from tiles import board, INJAILPOS
+from cards import CCcards, CHcards
 from enum import Enum
 
 # figure out git configs to work properly
@@ -138,6 +139,8 @@ class Button(pygame.sprite.Sprite):
         if tile.tileType == "Go To Jail":
           lastPlayer.position = 10
           lastPlayer.inJail = True
+        if tile.tileType == "Tax":
+          lastPlayer.money-= tile.value
         self.resetButton()
     if self.actionType == "pay":
       self.draw()
@@ -172,6 +175,7 @@ class Player():
     self.properties=[]
     self.inJail = False
     self.jailTime= 0
+    self.doubles=0
   def __repr__(self):
     return self.piece.name
     
@@ -238,6 +242,12 @@ def diceRoll():
   
 def move(player, d1, d2):
   roll = d1 + d2
+  if d1 == d2: player.doubles+=1
+  if player.doubles == 3:
+    player.inJail = True
+    player.position = 10
+    player.doubles = 0
+    return player.position
   if player.inJail:
     if d1 == d2:
       player.inJail = False
@@ -249,7 +259,7 @@ def move(player, d1, d2):
       player.position += roll
       player.inJail = False
       player.jailTime = 0
-  else: player.position += 10
+  else: player.position += roll
   if player.position >= 40:
     player.position -= 40
     player.money+=200
@@ -271,8 +281,8 @@ def printBoard():
       print()
 
 def updateBoard():
-  global player, gameState, lastPlayer, tile
-  lastTurn = turn - 1
+  global player, gameState, lastPlayer, tile, rolledDouble
+  lastTurn = turn - 1 if not rolledDouble else turn
   lastPlayer = players[lastTurn]
   tile = board[lastPlayer.position]
   screen.blit(boardImage,(0,0))
@@ -301,11 +311,14 @@ def updateBoard():
       buyButton.update()
       skipButton.update()
     else:
+      if tile.tileType == "Tax":
+        drawText("Pay tax: $" + str(tile.value), V(250, 195))
       confirmButton.update()
   pygame.display.update()
   
 GameRunning=True
 firstTurn = True
+rolledDouble = False
 
 class STATE(Enum):
   START_NUM_PLAYERS = 0
@@ -339,13 +352,18 @@ while GameRunning:
         firstTurn = False
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
+        if die1.value == die2.value and not player.inJail:
+          rolledDouble = True
+        else:
+          rolledDouble = False
+          player.doubles = 0
         updateBoard()
         gameState = STATE.PLAY_CHOOSE
-        # do double skip turn here
-        if turn < len(players)-1:
-          turn+=1
-        else:
-          turn = 0
+        if not rolledDouble:
+          if turn < len(players)-1:
+            turn+=1
+          else:
+            turn = 0
       elif diceRolling:
         pygame.time.set_timer(rollingDice, Die.rollTime)
   if gameState == STATE.START_NUM_PLAYERS:
