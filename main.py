@@ -6,6 +6,9 @@ from enum import Enum
 
 # figure out git configs to work properly
 
+random.shuffle(CHcards)
+random.shuffle(CCcards)
+
 pygame.init()
 
 pieceSize = 50
@@ -54,6 +57,7 @@ buy = pygame.image.load("Buy button.png")
 skip = pygame.image.load("Skip button.png")
 confirm = pygame.image.load("Confirm Button.png")
 pay = pygame.image.load("Pay button.png")
+chance = pygame.image.load("chance.png")
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
 screenWidth = 500
@@ -98,7 +102,7 @@ class Button(pygame.sprite.Sprite):
     screen.blit(self.image, self.rect)
     return action
   def update(self):
-    global playerAmount, gameState, lastPlayer, tile
+    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard
     if self.actionType == "num players":
       if self.draw():
         playerAmount = self.value
@@ -141,7 +145,6 @@ class Button(pygame.sprite.Sprite):
           lastPlayer.inJail = True
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
-        self.resetButton()
     if self.actionType == "pay":
       self.draw()
       if self.clicked and not Button.mouseDown:
@@ -154,7 +157,16 @@ class Button(pygame.sprite.Sprite):
           Button.showAlert = True
         if Button.showAlert:
           drawText("Not enough money", V(250, 300))
-
+    if self.actionType == "chance":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        chosenCard = CHcards.pop()
+        self.resetButton()
+        gameState = STATE.CARD
+        if tile.tileType == 'Chance' and not cardRead:
+            cardRead = True
+            if chosenCard.effect == 'advance':
+              lastPlayer.position = chosenCard.value
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -204,7 +216,9 @@ players=[]
 player = None
 lastPlayer = None
 tile = board[0]
-    
+chosenCard = None
+cardRead = False
+
 random.shuffle(players)
 print("Order:", players)
 
@@ -234,6 +248,7 @@ buyButton = Button(buy, V(125,200), 0.5, "buy")
 skipButton = Button(skip, V(300, 200), 0.5, "skip")
 confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
 payButton = Button(pay, V(300,215), 0.5, "pay")
+chanceButton = Button(chance, V(300,215),0.5, "chance")
 
 rollDoubles = False
 
@@ -291,8 +306,18 @@ def updateBoard():
     drawText("$" + str(lastPlayer.money), V(350, 150))
     # if player.inJail:
     #   drawText(lastPlayer.piece.name + " has been in jail for " + str(lastPlayer.jailTime) + " turns.", (250, 350))
-    drawText(lastPlayer.piece.name + " landed on ", (250, 350))
-    drawText(tile.name, (250, 400))
+    if gameState != STATE.CARD:
+      drawText(lastPlayer.piece.name + " landed on ", (250, 350))
+      drawText(tile.name, (250, 400))
+    else:
+      lineBreak = 23
+      drawText("You've drawn:", V(250, 300))
+      for i in range(len(chosenCard.description)//lineBreak + 1):
+        j = i*lineBreak + lineBreak
+        if j> len(chosenCard.description):
+          j = len(chosenCard.description)
+        drawText(chosenCard.description[i*lineBreak:j], V(250, 325 + i * 25))
+      
   for player in players:
     if board[player.position].name == "Jail" and player.inJail: 
       screen.blit(player.piece.image, INJAILPOS)
@@ -310,10 +335,14 @@ def updateBoard():
       drawText("$" + str(tile.value), V(160, 185))
       buyButton.update()
       skipButton.update()
+    elif tile.tileType == "Chance":
+      chanceButton.update()
     else:
       if tile.tileType == "Tax":
         drawText("Pay tax: $" + str(tile.value), V(250, 195))
       confirmButton.update()
+  elif gameState == STATE.CARD:
+    confirmButton.update()
   pygame.display.update()
   
 GameRunning=True
@@ -325,7 +354,8 @@ class STATE(Enum):
   START_PIECES = 1
   PLAY = 2
   PLAY_CHOOSE = 3
-  END = 4
+  CARD = 4
+  END = 5
 
 gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
@@ -350,6 +380,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
+        die1.value, die2.value = 3, 4
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:
@@ -381,6 +412,8 @@ while GameRunning:
     updateBoard()
     player = players[turn]
   if gameState == STATE.PLAY_CHOOSE:
+    updateBoard()
+  if gameState == STATE.CARD:
     updateBoard()
   pygame.display.update()
     
