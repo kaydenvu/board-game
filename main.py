@@ -87,11 +87,12 @@ class Button(pygame.sprite.Sprite):
     self.actionType = actionType
     self.value = value
   def resetButton(self):
-    global gameState
+    global gameState, cardRead
     gameState = STATE.PLAY
     self.clicked = False
     Button.showAlert = False
     buyButton.clicked = False
+    cardRead = False
   def draw(self):
     action = False
     pos = pygame.mouse.get_pos()
@@ -145,6 +146,7 @@ class Button(pygame.sprite.Sprite):
           lastPlayer.inJail = True
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
+        self.resetButton()
     if self.actionType == "pay":
       self.draw()
       if self.clicked and not Button.mouseDown:
@@ -166,7 +168,28 @@ class Button(pygame.sprite.Sprite):
         if tile.tileType == 'Chance' and not cardRead:
             cardRead = True
             if chosenCard.effect == 'advance':
+              if lastPlayer.position >= chosenCard.value:
+                lastPlayer.money +=200
               lastPlayer.position = chosenCard.value
+            if chosenCard.effect == 'collect':
+              lastPlayer.money += chosenCard.value
+            if chosenCard.effect == 'goback':
+              lastPlayer.position -= chosenCard.value
+            if chosenCard.effect == 'fine':
+              lastPlayer.money -= chosenCard.value
+            if chosenCard.effect == 'goToJail':
+              lastPlayer.inJail = True
+              lastPlayer.position = chosenCard.value
+            if chosenCard.effect == 'chairman':
+              for player in players:
+                player.money+=50
+                lastPlayer.money-=50
+            if chosenCard.effect == 'birthday':
+              for player in players:
+                player.money-=10
+                lastPlayer.money+=10
+
+
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -319,7 +342,7 @@ def updateBoard():
         drawText(chosenCard.description[i*lineBreak:j], V(250, 325 + i * 25))
       
   for player in players:
-    if board[player.position].name == "Jail" and player.inJail: 
+    if player.inJail: 
       screen.blit(player.piece.image, INJAILPOS)
     else:
       screen.blit(player.piece.image, board[player.position].position)
