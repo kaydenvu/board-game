@@ -1,7 +1,7 @@
 import random
 import pygame
 from tiles import board, INJAILPOS
-from cards import CCcards, CHcards
+from cards import CCcards, CHcards, getOutOfJail
 from enum import Enum
 
 # figure out git configs to work properly
@@ -58,6 +58,7 @@ skip = pygame.image.load("Skip button.png")
 confirm = pygame.image.load("Confirm Button.png")
 pay = pygame.image.load("Pay button.png")
 chance = pygame.image.load("chance.png")
+outOfJailFree = pygame.image.load("Get Out Of Jail Free.png")
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
 screenWidth = 500
@@ -103,7 +104,7 @@ class Button(pygame.sprite.Sprite):
     screen.blit(self.image, self.rect)
     return action
   def update(self):
-    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard
+    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard, turn
     if self.actionType == "num players":
       if self.draw():
         playerAmount = self.value
@@ -159,6 +160,14 @@ class Button(pygame.sprite.Sprite):
           Button.showAlert = True
         if Button.showAlert:
           drawText("Not enough money", V(250, 300))
+    if self.actionType == 'outOfJail':
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        lastPlayer.inJail = False
+        lastPlayer.jailTime = 0
+        lastPlayer.getOutOfJail.pop()
+        self.resetButton()
+        turn -= 1
     if self.actionType == "chance":
       self.draw()
       if self.clicked and not Button.mouseDown:
@@ -193,7 +202,7 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              
+              pass
 
 
 for idx, num in enumerate([num2, num3, num4, num5], 2):
@@ -217,7 +226,7 @@ class Player():
     self.inJail = False
     self.jailTime= 0
     self.doubles=0
-    self.getOutOfJail=0
+    self.getOutOfJail=[""]
     self.houses = 0
     self.hotels = 0
   def __repr__(self):
@@ -281,6 +290,7 @@ skipButton = Button(skip, V(300, 200), 0.5, "skip")
 confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
 payButton = Button(pay, V(300,215), 0.5, "pay")
 chanceButton = Button(chance, V(300,215),0.5, "chance")
+outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
 
 rollDoubles = False
 
@@ -362,6 +372,8 @@ def updateBoard():
     rollButton.update()
     if lastPlayer.inJail:
       payButton.update()
+      if lastPlayer.getOutOfJail:
+        outOfJailButton.update()
   elif gameState == STATE.PLAY_CHOOSE:
     if tile.tileType == "Property":
       drawText("$" + str(tile.value), V(160, 185))
@@ -412,7 +424,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 3, 4
+        die1.value, die2.value = 5, 5
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:
