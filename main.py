@@ -188,6 +188,12 @@ class Button(pygame.sprite.Sprite):
               for player in players:
                 player.money-=10
                 lastPlayer.money+=10
+            if chosenCard.effect == "streetRepair":
+              lastPlayer.money -= (lastPlayer.houses * 40 + lastPlayer.hotels *115)
+            if chosenCard.effect == "repairs":
+              lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
+            if chosenCard.effect == "getOutOfJail":
+              
 
 
 for idx, num in enumerate([num2, num3, num4, num5], 2):
@@ -211,6 +217,9 @@ class Player():
     self.inJail = False
     self.jailTime= 0
     self.doubles=0
+    self.getOutOfJail=0
+    self.houses = 0
+    self.hotels = 0
   def __repr__(self):
     return self.piece.name
     
