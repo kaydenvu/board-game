@@ -58,7 +58,9 @@ skip = pygame.image.load("Skip button.png")
 confirm = pygame.image.load("Confirm Button.png")
 pay = pygame.image.load("Pay button.png")
 chance = pygame.image.load("chance.png")
+community = pygame.image.Load("Community Chest.png")
 outOfJailFree = pygame.image.load("Get Out Of Jail Free.png")
+
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
 screenWidth = 500
@@ -179,6 +181,8 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == 'advance':
               if lastPlayer.position >= chosenCard.value:
                 lastPlayer.money +=200
+                gameState=STATE.PLAY_CHOOSE
+                updateBoard()
               lastPlayer.position = chosenCard.value
             if chosenCard.effect == 'collect':
               lastPlayer.money += chosenCard.value
@@ -202,8 +206,64 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              pass
-
+              lastPlayer.getOutOffJail.apppend(chosenCard)
+            if chosenCard.effect == "railroad":
+              while board[lastPlayer.position].color != "Black":
+                lastPlayer.position+=1 if lastPlayer.position <40 else 0
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()
+            if chosenCard.effect == "utility":
+              while board[lastPlayer.position].color != "Utility":
+                lastPlayer.position+=1 if lastPlayer.position <40 else 0
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()  
+    if self.actionType == "community":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        chosenCard = CCcards.pop()
+        self.resetButton()
+        gameState = STATE.CARD
+        if tile.tileType == 'Community Chest' and not cardRead:
+            cardRead = True
+            if chosenCard.effect == 'advance':
+              if lastPlayer.position >= chosenCard.value:
+                lastPlayer.money +=200
+                gameState=STATE.PLAY_CHOOSE
+                updateBoard()
+              lastPlayer.position = chosenCard.value
+             if chosenCard.effect == 'collect':
+              lastPlayer.money += chosenCard.value
+            if chosenCard.effect == 'goback':
+              lastPlayer.position -= chosenCard.value
+            if chosenCard.effect == 'fine':
+              lastPlayer.money -= chosenCard.value
+            if chosenCard.effect == 'goToJail':
+              lastPlayer.inJail = True
+              lastPlayer.position = chosenCard.value
+            if chosenCard.effect == 'chairman':
+              for player in players:
+                player.money+=50
+                lastPlayer.money-=50
+            if chosenCard.effect == 'birthday':
+              for player in players:
+                player.money-=10
+                lastPlayer.money+=10
+            if chosenCard.effect == "streetRepair":
+              lastPlayer.money -= (lastPlayer.houses * 40 + lastPlayer.hotels *115)
+            if chosenCard.effect == "repairs":
+              lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
+            if chosenCard.effect == "getOutOfJail":
+              lastPlayer.getOutOffJail.apppend(chosenCard)
+            if chosenCard.effect == "railroad":
+              while board[lastPlayer.position].color != "Black":
+                lastPlayer.position+=1 if lastPlayer.position <40 else 0
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()
+            if chosenCard.effect == "utility":
+              while board[lastPlayer.position].color != "Utility":
+                lastPlayer.position+=1 if lastPlayer.position <40 else 0
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()  
 
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
@@ -226,7 +286,7 @@ class Player():
     self.inJail = False
     self.jailTime= 0
     self.doubles=0
-    self.getOutOfJail=[""]
+    self.getOutOfJail=[]
     self.houses = 0
     self.hotels = 0
   def __repr__(self):
@@ -291,12 +351,12 @@ confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
 payButton = Button(pay, V(300,215), 0.5, "pay")
 chanceButton = Button(chance, V(300,215),0.5, "chance")
 outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
+communityButton = Button(community, V(300,215),0.5,"community" )
 
 rollDoubles = False
 
 def diceRoll():
   return (random.randint(1,6), random.randint(1,6))
-  
 def move(player, d1, d2):
   roll = d1 + d2
   if d1 == d2: player.doubles+=1
@@ -424,7 +484,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 5, 5
+        die1.value, die2.value = 3,4
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:
