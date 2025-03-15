@@ -58,7 +58,7 @@ skip = pygame.image.load("Skip button.png")
 confirm = pygame.image.load("Confirm Button.png")
 pay = pygame.image.load("Pay button.png")
 chance = pygame.image.load("chance.png")
-community = pygame.image.Load("Community Chest.png")
+community = pygame.image.load("Community Chest.png")
 outOfJailFree = pygame.image.load("Get Out Of Jail Free.png")
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
@@ -231,7 +231,7 @@ class Button(pygame.sprite.Sprite):
                 gameState=STATE.PLAY_CHOOSE
                 updateBoard()
               lastPlayer.position = chosenCard.value
-             if chosenCard.effect == 'collect':
+            if chosenCard.effect == 'collect':
               lastPlayer.money += chosenCard.value
             if chosenCard.effect == 'goback':
               lastPlayer.position -= chosenCard.value
@@ -253,7 +253,7 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              lastPlayer.getOutOffJail.apppend(chosenCard)
+              lastPlayer.getOutOfJail.apppend(chosenCard)
             if chosenCard.effect == "railroad":
               while board[lastPlayer.position].color != "Black":
                 lastPlayer.position+=1 if lastPlayer.position <40 else 0
@@ -291,6 +291,23 @@ class Player():
     self.hotels = 0
   def __repr__(self):
     return self.piece.name
+properties = {
+  "MA" : [2,10,30,90,160,250,30,50],
+  "BA" : [4,20,60,180,320,450,30,50],
+  "OA" : [6,30,90,270,400,550,50,50],
+  "VA" : [6,30,90,270,400,550,50,50],
+  "CA" : [8,40,100,300,450,600,60,50],
+  "SC" : [10,50,150,450,625,750,70,100],
+  "SA" : [10,50,150,450,625,750,70,100],
+  "VirA" : [12,60,180,500,700,900,80,100],
+  "JP" : [14,70,200,550,750,950,90,100],
+  "TA" : [14,70,200,550,750,950,90,100],
+  "NYA" : [16,80,220,600,800,1000,100,100],
+  "KA" : [18,90,250,700,875,1050,110,150],
+  "IA" : [18,90,250,700,875,1050,110,150],
+  "IL" : [20,100,300,750,925,1100,120,150],
+  "AA" : [22,110,330,800,975,1150,130,150],
+}
     
 battleship = Piece("battleship", battleshipImage)
 raceCar=Piece("race car", raceCarImage)
