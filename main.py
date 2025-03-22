@@ -131,9 +131,16 @@ class Button(pygame.sprite.Sprite):
       self.draw()
       if self.clicked and not Button.mouseDown:
         if lastPlayer.money>= tile.value:
-          lastPlayer.money -= tile.value
-          self.resetButton()
+          for player in players:
+            for property in player.properties:
+              if property == board[lastPlayer.position]:
+                self.resetButton()
+              else:
+                lastPlayer.money -= tile.value
+                lastPlayer.properties.append(board[lastPlayer.position])
+                print(lastPlayer.properties)
         else:
+          self.resetButton()
           Button.showAlert = True
         if Button.showAlert:
           drawText("Not enough money", V(250, 300))
@@ -291,7 +298,7 @@ class Player():
     self.hotels = 0
   def __repr__(self):
     return self.piece.name
-properties = {
+Properties = {
   "MA" : [2,10,30,90,160,250,30,50],
   "BA" : [4,20,60,180,320,450,30,50],
   "OA" : [6,30,90,270,400,550,50,50],
@@ -307,6 +314,13 @@ properties = {
   "IA" : [18,90,250,700,875,1050,110,150],
   "IL" : [20,100,300,750,925,1100,120,150],
   "AA" : [22,110,330,800,975,1150,130,150],
+  "VET" : [22,110,330,800,975,1150,130,150],
+  "MG" : [24,120,360,850,1025,1200,140,150],
+  "PA" : [26,130,390,900,1100,1275,150,200],
+  "NC" : [26,130,390,900,1100,1275,150,200],
+  "Penn" : [28,150,450,1000,1200,1400,160,200],
+  "PP" : [35,175,500,1100,1300,1500,175,200],
+  "B" : [50,200,600,1400,1700,2000,200,200]
 }
     
 battleship = Piece("battleship", battleshipImage)
