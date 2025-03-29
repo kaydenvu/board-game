@@ -131,16 +131,18 @@ class Button(pygame.sprite.Sprite):
       self.draw()
       if self.clicked and not Button.mouseDown:
         if lastPlayer.money>= tile.value:
-          for player in players:
-            for property in player.properties:
-              if property == board[lastPlayer.position]:
-                self.resetButton()
-              else:
-                lastPlayer.money -= tile.value
-                lastPlayer.properties.append(board[lastPlayer.position])
-                print(lastPlayer.properties)
-        else:
+          # for player in players:
+          #   for property in player.properties:
+          #     if property == board[lastPlayer.position]:
+          #       self.resetButton()
+          #     else:
+          #       lastPlayer.money -= tile.value
+          #       lastPlayer.properties.append(board[lastPlayer.position])
+          #       print(lastPlayer.properties)
+          lastPlayer.money -= tile.value
           self.resetButton()
+        else:
+          # self.resetButton()
           Button.showAlert = True
         if Button.showAlert:
           drawText("Not enough money", V(250, 300))
