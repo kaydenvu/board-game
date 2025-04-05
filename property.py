@@ -40,6 +40,6 @@ PenAve = Property('Pennsylvania Avenue', "Green", 28, 150, 450, 1000, 1200, 1400
 ParkPlace = Property('Park Place', "Dark Blue", 35, 175, 500, 1100, 1300, 1500, 175, 200)
 Boardwalk = Property('Boardwalk',"Dark Blue", 50, 200, 600, 1400, 1700, 2000, 200, 200)
 
-properties = [MedAve, BalAve, OrAve, VerAve, ConAve, StChar, StaAve, VirAve, StJames, 
-              TenAve, NewAve, KenAve, IndAve, IllAve, AtlAve, VenAve, MarGar, PacAve, 
-              NorAve, PenAve, ParkPlace, Boardwalk]
+properties = [MedAve, BalAve, ReadRail, OrAve, VerAve, ConAve, StChar, StaAve, VirAve, PennRail, StJames, 
+              TenAve, NewAve, KenAve, IndAve, IllAve, BNORail, AtlAve, VenAve, MarGar, PacAve, 
+              NorAve, ShortLine, PenAve, ParkPlace, Boardwalk]

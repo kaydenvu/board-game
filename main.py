@@ -3,6 +3,7 @@ import pygame
 from tiles import board, INJAILPOS
 from cards import CCcards, CHcards, getOutOfJail
 from enum import Enum
+from property import properties
 
 # figure out git configs to work properly
 
@@ -131,6 +132,8 @@ class Button(pygame.sprite.Sprite):
       self.draw()
       if self.clicked and not Button.mouseDown:
         if lastPlayer.money>= tile.value:
+          if tile.property in properties:
+
           # for player in players:
           #   for property in player.properties:
           #     if property == board[lastPlayer.position]:
@@ -139,8 +142,9 @@ class Button(pygame.sprite.Sprite):
           #       lastPlayer.money -= tile.value
           #       lastPlayer.properties.append(board[lastPlayer.position])
           #       print(lastPlayer.properties)
-          lastPlayer.money -= tile.value
-          self.resetButton()
+            lastPlayer.money -= tile.value
+            lastPlayer.properties.append(properties.pop(properties.index(tile.property)))
+            self.resetButton()
         else:
           # self.resetButton()
           Button.showAlert = True
@@ -215,7 +219,7 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              lastPlayer.getOutOffJail.apppend(chosenCard)
+              lastPlayer.getOutOfJail.apppend(chosenCard)
             if chosenCard.effect == "railroad":
               while board[lastPlayer.position].color != "Black":
                 lastPlayer.position+=1 if lastPlayer.position <40 else 0
