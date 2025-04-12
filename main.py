@@ -132,21 +132,10 @@ class Button(pygame.sprite.Sprite):
       self.draw()
       if self.clicked and not Button.mouseDown:
         if lastPlayer.money>= tile.value:
-          if tile.property in properties:
-
-          # for player in players:
-          #   for property in player.properties:
-          #     if property == board[lastPlayer.position]:
-          #       self.resetButton()
-          #     else:
-          #       lastPlayer.money -= tile.value
-          #       lastPlayer.properties.append(board[lastPlayer.position])
-          #       print(lastPlayer.properties)
-            lastPlayer.money -= tile.value
-            lastPlayer.properties.append(properties.pop(properties.index(tile.property)))
-            self.resetButton()
+          lastPlayer.money -= tile.value
+          lastPlayer.properties.append(properties.pop(properties.index(tile.property)))
+          self.resetButton()
         else:
-          # self.resetButton()
           Button.showAlert = True
         if Button.showAlert:
           drawText("Not enough money", V(250, 300))
@@ -162,6 +151,9 @@ class Button(pygame.sprite.Sprite):
           lastPlayer.inJail = True
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
+        if tile.tileType == "Property":
+          lastPlayer.money -= tile.property.rent
+        
         self.resetButton()
     if self.actionType == "pay":
       self.draw()
@@ -219,7 +211,7 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              lastPlayer.getOutOfJail.apppend(chosenCard)
+              lastPlayer.getOutOfJail.append(chosenCard)
             if chosenCard.effect == "railroad":
               while board[lastPlayer.position].color != "Black":
                 lastPlayer.position+=1 if lastPlayer.position <40 else 0
@@ -266,7 +258,7 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == "repairs":
               lastPlayer.money -= (lastPlayer.houses * 25 + lastPlayer.hotels *100)
             if chosenCard.effect == "getOutOfJail":
-              lastPlayer.getOutOfJail.apppend(chosenCard)
+              lastPlayer.getOutOfJail.append(chosenCard)
             if chosenCard.effect == "railroad":
               while board[lastPlayer.position].color != "Black":
                 lastPlayer.position+=1 if lastPlayer.position <40 else 0
@@ -473,11 +465,17 @@ def updateBoard():
         outOfJailButton.update()
   elif gameState == STATE.PLAY_CHOOSE:
     if tile.tileType == "Property":
-      drawText("$" + str(tile.value), V(160, 185))
-      buyButton.update()
-      skipButton.update()
+      if tile.property in properties:
+        drawText("$" + str(tile.value), V(160, 185))
+        buyButton.update()
+        skipButton.update()
+      else:
+        drawText("You payed $" + str(tile.property.rent) + " in rent", V(250, 185))
+        confirmButton.update()
     elif tile.tileType == "Chance":
       chanceButton.update()
+    elif tile.tileType == "Community Chest":
+      communityButton.update()
     else:
       if tile.tileType == "Tax":
         drawText("Pay tax: $" + str(tile.value), V(250, 195))
@@ -521,7 +519,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 3,4
+        die1.value, die2.value = 1,1
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:
