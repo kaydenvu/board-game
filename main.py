@@ -152,7 +152,7 @@ class Button(pygame.sprite.Sprite):
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
         if tile.tileType == "Property":
-          lastPlayer.money -= tile.property.rent
+          lastPlayer.money -= tile.property.rent[tile.property.upgrades]
         
         self.resetButton()
     if self.actionType == "pay":
@@ -185,10 +185,10 @@ class Button(pygame.sprite.Sprite):
             cardRead = True
             if chosenCard.effect == 'advance':
               if lastPlayer.position >= chosenCard.value:
-                lastPlayer.money +=200
-                gameState=STATE.PLAY_CHOOSE
-                updateBoard()
+                lastPlayer.money +=200           
               lastPlayer.position = chosenCard.value
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()
             if chosenCard.effect == 'collect':
               lastPlayer.money += chosenCard.value
             if chosenCard.effect == 'goback':
@@ -233,9 +233,9 @@ class Button(pygame.sprite.Sprite):
             if chosenCard.effect == 'advance':
               if lastPlayer.position >= chosenCard.value:
                 lastPlayer.money +=200
-                gameState=STATE.PLAY_CHOOSE
-                updateBoard()
               lastPlayer.position = chosenCard.value
+              gameState=STATE.PLAY_CHOOSE
+              updateBoard()
             if chosenCard.effect == 'collect':
               lastPlayer.money += chosenCard.value
             if chosenCard.effect == 'goback':
@@ -470,7 +470,7 @@ def updateBoard():
         buyButton.update()
         skipButton.update()
       else:
-        drawText("You payed $" + str(tile.property.rent) + " in rent", V(250, 185))
+        drawText("You payed $" + str(tile.property.rent[tile.property.upgrades]) + " in rent", V(250, 185))
         confirmButton.update()
     elif tile.tileType == "Chance":
       chanceButton.update()
@@ -519,7 +519,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 1,1
+        die1.value, die2.value = 2, 5
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:

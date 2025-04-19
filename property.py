@@ -2,14 +2,10 @@ class Property():
   def __init__(self, name, siteColor, rent, house, house2, house3, house4, hotel, mortgage, cost):
     self.name=name
     self.siteColor=siteColor
-    self.rent= rent
-    self.house=house
-    self.house2=house2
-    self.house3=house3
-    self.house4=house4
-    self.hotel=hotel
+    self.rent=[rent,rent*2,house,house2,house3,house4,hotel]
     self.mortgage = mortgage
     self.costHouse=cost
+    self.upgrades = 0
 
 MedAve = Property('Mediterranean Avenue', "Brown", 2, 10, 30, 90, 160, 250, 30,50)
 BalAve = Property('Baltic Avenue',"Brown", 4, 20, 60, 180, 320, 450, 30, 50)
@@ -40,6 +36,6 @@ PenAve = Property('Pennsylvania Avenue', "Green", 28, 150, 450, 1000, 1200, 1400
 ParkPlace = Property('Park Place', "Dark Blue", 35, 175, 500, 1100, 1300, 1500, 175, 200)
 Boardwalk = Property('Boardwalk',"Dark Blue", 50, 200, 600, 1400, 1700, 2000, 200, 200)
 
-properties = [MedAve, BalAve, ReadRail, OrAve, VerAve, ConAve, StChar, StaAve, VirAve, PennRail, StJames, 
-              TenAve, NewAve, KenAve, IndAve, IllAve, BNORail, AtlAve, VenAve, MarGar, PacAve, 
+properties = [MedAve, BalAve, ReadRail, OrAve, VerAve, ConAve, StChar, EleComp, StaAve, VirAve, PennRail, StJames, 
+              TenAve, NewAve, KenAve, IndAve, IllAve, BNORail, AtlAve, VenAve, WaterWorks, MarGar, PacAve, 
               NorAve, ShortLine, PenAve, ParkPlace, Boardwalk]
