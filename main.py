@@ -61,12 +61,17 @@ pay = pygame.image.load("Pay button.png")
 chance = pygame.image.load("chance.png")
 community = pygame.image.load("Community Chest.png")
 outOfJailFree = pygame.image.load("Get Out Of Jail Free.png")
+propertiesButtonImage = pygame.image.load("Properties Button.png")
+propertiesMenu = pygame.image.load("Properties Menu.png")
+X = pygame.image.load("X Button.png")
+
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
 screenWidth = 500
 screenHeight = 500
 screen = pygame.display.set_mode((screenWidth, screenHeight))
+propertiesMenu = pygame.transform.scale(propertiesMenu, (screenWidth, screenHeight))
 V = pygame.Vector2
 
 pygame.display.set_caption("Monopoly")
@@ -269,7 +274,13 @@ class Button(pygame.sprite.Sprite):
                 lastPlayer.position+=1 if lastPlayer.position <40 else 0
               gameState=STATE.PLAY_CHOOSE
               updateBoard()  
-
+    if self.actionType == "property menu":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        print("clicked")
+        self.resetButton()
+        gameState = STATE.PROPERTY_MENU
+        updateBoard()
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -380,7 +391,9 @@ confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
 payButton = Button(pay, V(300,215), 0.5, "pay")
 chanceButton = Button(chance, V(300,215),0.5, "chance")
 outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
-communityButton = Button(community, V(300,215),0.5,"community" )
+communityButton = Button(community, V(300,215),0.5,"community")
+propertiesButton = Button(propertiesButtonImage, V(300,230),0.5,"property menu")
+XButton = Button(X, V(200,20), 0.5, "exit menu")
 
 rollDoubles = False
 
@@ -463,6 +476,7 @@ def updateBoard():
       payButton.update()
       if lastPlayer.getOutOfJail:
         outOfJailButton.update()
+    propertiesButton.update()
   elif gameState == STATE.PLAY_CHOOSE:
     if tile.tileType == "Property":
       if tile.property in properties:
@@ -482,6 +496,8 @@ def updateBoard():
       confirmButton.update()
   elif gameState == STATE.CARD:
     confirmButton.update()
+  elif gameState == STATE.PROPERTY_MENU:
+    screen.blit(propertiesMenu, (0,0))
   pygame.display.update()
   
 GameRunning=True
@@ -494,7 +510,8 @@ class STATE(Enum):
   PLAY = 2
   PLAY_CHOOSE = 3
   CARD = 4
-  END = 5
+  PROPERTY_MENU = 5
+  END = 6
 
 gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
@@ -519,7 +536,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 2, 5
+        #die1.value, die2.value = 2, 5
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:

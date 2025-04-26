@@ -1,14 +1,20 @@
+import pygame
+
+MA = pygame.image.load("property cards/Mediterranean Avenue.png")
+BA = pygame.image.load("property cards/Baltic Avenue.png")
+
 class Property():
-  def __init__(self, name, siteColor, rent, house, house2, house3, house4, hotel, mortgage, cost):
+  def __init__(self, name, siteColor, rent, house, house2, house3, house4, hotel, mortgage, cost, image=None):
     self.name=name
     self.siteColor=siteColor
     self.rent=[rent,rent*2,house,house2,house3,house4,hotel]
     self.mortgage = mortgage
     self.costHouse=cost
     self.upgrades = 0
+    self.image = image
 
-MedAve = Property('Mediterranean Avenue', "Brown", 2, 10, 30, 90, 160, 250, 30,50)
-BalAve = Property('Baltic Avenue',"Brown", 4, 20, 60, 180, 320, 450, 30, 50)
+MedAve = Property('Mediterranean Avenue', "Brown", 2, 10, 30, 90, 160, 250, 30,50, MA)
+BalAve = Property('Baltic Avenue',"Brown", 4, 20, 60, 180, 320, 450, 30, 50, BA)
 ReadRail = Property("Reading Railroad", "Black", 25, 0, 0, 0, 0, 0, 100, 0)
 OrAve = Property('Oriental Avenue', "Light Blue", 6, 30, 90, 270, 400, 550, 50, 50)
 VerAve = Property('Vermont Avenue', "Light Blue", 6, 30, 90, 270, 400, 550, 50, 50)
