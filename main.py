@@ -281,6 +281,12 @@ class Button(pygame.sprite.Sprite):
         self.resetButton()
         gameState = STATE.PROPERTY_MENU
         updateBoard()
+    if self.actionType == "exit menu":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        print("clicked")
+        self.resetButton()
+        updateBoard()
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -393,7 +399,7 @@ chanceButton = Button(chance, V(300,215),0.5, "chance")
 outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
 communityButton = Button(community, V(300,215),0.5,"community")
 propertiesButton = Button(propertiesButtonImage, V(300,230),0.5,"property menu")
-XButton = Button(X, V(200,20), 0.5, "exit menu")
+XButton = Button(X, V(0,0), 0.5, "exit menu")
 
 rollDoubles = False
 
@@ -498,6 +504,12 @@ def updateBoard():
     confirmButton.update()
   elif gameState == STATE.PROPERTY_MENU:
     screen.blit(propertiesMenu, (0,0))
+    XButton.update()
+    for i in range(len(lastPlayer.properties)):
+      x = 25 + (i % 4) * 75
+      y = 25 + (i//4) * 150
+      screen.blit(lastPlayer.properties[i].image, V(x, y))
+    
   pygame.display.update()
   
 GameRunning=True
@@ -570,6 +582,8 @@ while GameRunning:
   if gameState == STATE.PLAY_CHOOSE:
     updateBoard()
   if gameState == STATE.CARD:
+    updateBoard()
+  if gameState ==  STATE.PROPERTY_MENU:
     updateBoard()
   pygame.display.update()
     
