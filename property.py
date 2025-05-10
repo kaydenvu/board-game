@@ -13,7 +13,7 @@ VA = pygame.image.load("property cards/Vermont Avenue.png")
 VirA = pygame.image.load('property cards/Virginia Avenue.png')
 
 scale = pygame.transform.scale_by
-scaleFactor = 0.3
+scaleFactor = 0.4
 
 MA = scale(MA, scaleFactor)
 BA = scale(BA, scaleFactor)

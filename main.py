@@ -64,6 +64,8 @@ outOfJailFree = pygame.image.load("Get Out Of Jail Free.png")
 propertiesButtonImage = pygame.image.load("Properties Button.png")
 propertiesMenu = pygame.image.load("Properties Menu.png")
 X = pygame.image.load("X Button.png")
+left = pygame.image.load("left arrow.png")
+right = pygame.image.load("right arrow.png")
 
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
@@ -112,7 +114,7 @@ class Button(pygame.sprite.Sprite):
     screen.blit(self.image, self.rect)
     return action
   def update(self):
-    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard, turn
+    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard, turn, pageNum
     if self.actionType == "num players":
       if self.draw():
         playerAmount = self.value
@@ -280,6 +282,7 @@ class Button(pygame.sprite.Sprite):
         print("clicked")
         self.resetButton()
         gameState = STATE.PROPERTY_MENU
+        pageNum = 0
         updateBoard()
     if self.actionType == "exit menu":
       self.draw()
@@ -287,6 +290,18 @@ class Button(pygame.sprite.Sprite):
         print("clicked")
         self.resetButton()
         updateBoard()
+    if self.actionType == "left":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        print("clicked")
+        self.resetButton()
+        pageNum -= 1
+    if self.actionType == "right":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        print("clicked")
+        self.resetButton()
+        pageNum += 1
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -399,7 +414,9 @@ chanceButton = Button(chance, V(300,215),0.5, "chance")
 outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
 communityButton = Button(community, V(300,215),0.5,"community")
 propertiesButton = Button(propertiesButtonImage, V(300,230),0.5,"property menu")
-XButton = Button(X, V(0,0), 0.5, "exit menu")
+XButton = Button(X, V(15,15), 0.5, "exit menu")
+leftButton = Button(left, V(0, 450), 0.3, "left")
+rightButton = Button(right, V(450,450), 0.3, "right")
 
 rollDoubles = False
 
@@ -505,10 +522,22 @@ def updateBoard():
   elif gameState == STATE.PROPERTY_MENU:
     screen.blit(propertiesMenu, (0,0))
     XButton.update()
-    for i in range(len(lastPlayer.properties)):
-      x = 25 + (i % 4) * 75
-      y = 25 + (i//4) * 150
-      screen.blit(lastPlayer.properties[i].image, V(x, y))
+    pages= []
+    for i in range(0, len(lastPlayer.properties), 4):
+      page = []
+      for j in range(4):
+        if i+j < len(lastPlayer.properties):
+          page.append(lastPlayer.properties[i+j])
+      pages.append(page)
+    if pageNum - 1 >= 0:
+      leftButton.update()
+    if pageNum + 1 < len(pages):
+      rightButton.update()
+    if pages:
+      for i in range(len(pages[pageNum])):
+        x = 75 + (i % 2) * 175
+        y = 25 + (i//2) * 225
+        screen.blit(pages[pageNum][i].image, V(x, y))
     
   pygame.display.update()
   
@@ -529,6 +558,7 @@ gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
 diceRolling = False
 turn = 0
+pageNum = 0
 
 while GameRunning:
   for event in pygame.event.get():
