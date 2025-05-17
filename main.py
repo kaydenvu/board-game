@@ -140,6 +140,7 @@ class Button(pygame.sprite.Sprite):
       if self.clicked and not Button.mouseDown:
         if lastPlayer.money>= tile.value:
           lastPlayer.money -= tile.value
+          properties[properties.index(tile.property)].owner = lastPlayer
           lastPlayer.properties.append(properties.pop(properties.index(tile.property)))
           self.resetButton()
         else:
@@ -159,8 +160,12 @@ class Button(pygame.sprite.Sprite):
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
         if tile.tileType == "Property":
-          lastPlayer.money -= tile.property.rent[tile.property.upgrades]
-        
+          if tile.property.siteColor == "Utility":
+            lastPlayer.money -= tile.property.rent[tile.property.upgrades] * (die1.value + die2.value)
+            tile.property.owner.money +=  tile.property.rent[tile.property.upgrades] * (die1.value + die2.value)
+          else:
+            lastPlayer.money -= tile.property.rent[tile.property.upgrades]
+            tile.property.owner.money += tile.property.rent[tile.property.upgrades]
         self.resetButton()
     if self.actionType == "pay":
       self.draw()
@@ -295,12 +300,14 @@ class Button(pygame.sprite.Sprite):
       if self.clicked and not Button.mouseDown:
         print("clicked")
         self.resetButton()
+        gameState = STATE.PROPERTY_MENU
         pageNum -= 1
     if self.actionType == "right":
       self.draw()
       if self.clicked and not Button.mouseDown:
         print("clicked")
         self.resetButton()
+        gameState = STATE.PROPERTY_MENU
         pageNum += 1
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
@@ -507,7 +514,10 @@ def updateBoard():
         buyButton.update()
         skipButton.update()
       else:
-        drawText("You payed $" + str(tile.property.rent[tile.property.upgrades]) + " in rent", V(250, 185))
+        if tile.property.siteColor == "Utility":
+          drawText("You payed $" + str((die1.value + die2.value) * tile.property.rent[tile.property.upgrades] ) + " in rent", V(250, 185))  
+        else:
+          drawText("You payed $" + str(tile.property.rent[tile.property.upgrades]) + " in rent", V(250, 185))
         confirmButton.update()
     elif tile.tileType == "Chance":
       chanceButton.update()
@@ -578,7 +588,7 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        #die1.value, die2.value = 2, 5
+        #die1.value, die2.value = 3, 5
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:
