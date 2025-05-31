@@ -4,11 +4,14 @@ from tiles import board, INJAILPOS
 from cards import CCcards, CHcards, getOutOfJail
 from enum import Enum
 from property import properties
+from copy import copy
 
 # figure out git configs to work properly
 
-random.shuffle(CHcards)
-random.shuffle(CCcards)
+copyCHcards = copy(CHcards)
+copyCCcards = copy(CCcards)
+random.shuffle(copyCHcards)
+random.shuffle(copyCCcards)
 
 pygame.init()
 
@@ -114,7 +117,7 @@ class Button(pygame.sprite.Sprite):
     screen.blit(self.image, self.rect)
     return action
   def update(self):
-    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard, turn, pageNum
+    global playerAmount, gameState, lastPlayer, tile, cardRead, chosenCard, turn, pageNum, finalDiceSum, copyCHcards, copyCCcards
     if self.actionType == "num players":
       if self.draw():
         playerAmount = self.value
@@ -141,7 +144,16 @@ class Button(pygame.sprite.Sprite):
         if lastPlayer.money>= tile.value:
           lastPlayer.money -= tile.value
           properties[properties.index(tile.property)].owner = lastPlayer
+          if properties[properties.index(tile.property)].siteColor == "Utility":
+            lastPlayer.utilities += 1
+          if properties[properties.index(tile.property)].siteColor == "Black":
+            lastPlayer.railroads += 1
           lastPlayer.properties.append(properties.pop(properties.index(tile.property)))
+          for property in lastPlayer.properties:
+              if property.siteColor == "Utility":
+                property.upgrades = lastPlayer.utilities - 1
+              if property.siteColor == "Black":
+                property.upgrades = lastPlayer.railroads -1
           self.resetButton()
         else:
           Button.showAlert = True
@@ -159,10 +171,10 @@ class Button(pygame.sprite.Sprite):
           lastPlayer.inJail = True
         if tile.tileType == "Tax":
           lastPlayer.money-= tile.value
-        if tile.tileType == "Property":
+        if tile.tileType == "Property" and tile.property.owner:
           if tile.property.siteColor == "Utility":
-            lastPlayer.money -= tile.property.rent[tile.property.upgrades] * (die1.value + die2.value)
-            tile.property.owner.money +=  tile.property.rent[tile.property.upgrades] * (die1.value + die2.value)
+            lastPlayer.money -= tile.property.rent[tile.property.upgrades] * (finalDiceSum)
+            tile.property.owner.money +=  tile.property.rent[tile.property.upgrades] * (finalDiceSum)
           else:
             lastPlayer.money -= tile.property.rent[tile.property.upgrades]
             tile.property.owner.money += tile.property.rent[tile.property.upgrades]
@@ -190,7 +202,10 @@ class Button(pygame.sprite.Sprite):
     if self.actionType == "chance":
       self.draw()
       if self.clicked and not Button.mouseDown:
-        chosenCard = CHcards.pop()
+        if not copyCHcards:
+          copyCHcards = copy(CHcards)
+          random.shuffle(copyCHcards)
+        chosenCard = copyCHcards.pop()
         self.resetButton()
         gameState = STATE.CARD
         if tile.tileType == 'Chance' and not cardRead:
@@ -237,7 +252,10 @@ class Button(pygame.sprite.Sprite):
     if self.actionType == "community":
       self.draw()
       if self.clicked and not Button.mouseDown:
-        chosenCard = CCcards.pop()
+        if not copyCCcards:
+          copyCCcards = copy(CCcards)
+          random.shuffle(copyCCcards)
+        chosenCard = copyCCcards.pop()
         self.resetButton()
         gameState = STATE.CARD
         if tile.tileType == 'Community Chest' and not cardRead:
@@ -333,6 +351,8 @@ class Player():
     self.getOutOfJail=[]
     self.houses = 0
     self.hotels = 0
+    self.utilities = 0
+    self.railroads = 0
   def __repr__(self):
     return self.piece.name
 Properties = {
@@ -416,7 +436,7 @@ rollButton = Button(roll, V(215, 215), 0.5, "roll dice")
 buyButton = Button(buy, V(125,200), 0.5, "buy")
 skipButton = Button(skip, V(300, 200), 0.5, "skip")
 confirmButton = Button(confirm, V(195,215), 0.5, "confirm")
-payButton = Button(pay, V(300,215), 0.5, "pay")
+payButton = Button(pay, V(125,215), 0.5, "pay")
 chanceButton = Button(chance, V(300,215),0.5, "chance")
 outOfJailButton = Button(outOfJailFree, V(75,75),0.5,"outOfJail")
 communityButton = Button(community, V(300,215),0.5,"community")
@@ -515,7 +535,8 @@ def updateBoard():
         skipButton.update()
       else:
         if tile.property.siteColor == "Utility":
-          drawText("You payed $" + str((die1.value + die2.value) * tile.property.rent[tile.property.upgrades] ) + " in rent", V(250, 185))  
+          global finalDiceSum
+          drawText("You payed $" + str((finalDiceSum) * tile.property.rent[tile.property.upgrades] ) + " in rent", V(250, 185))
         else:
           drawText("You payed $" + str(tile.property.rent[tile.property.upgrades]) + " in rent", V(250, 185))
         confirmButton.update()
@@ -569,6 +590,7 @@ rollingDice = pygame.USEREVENT + 1
 diceRolling = False
 turn = 0
 pageNum = 0
+finalDiceSum = 0
 
 while GameRunning:
   for event in pygame.event.get():
@@ -588,7 +610,8 @@ while GameRunning:
         diceRolling = False
         rollButton.clicked = False
         firstTurn = False
-        #die1.value, die2.value = 3, 5
+        die1.value, die2.value = 6,6
+        finalDiceSum = die1.value + die2.value
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
         if die1.value == die2.value and not player.inJail:

@@ -72,6 +72,8 @@ class Property():
     self.upgrades = 0
     if self.siteColor == "Utility":
       self.rent = [4, 10]
+    if self.siteColor == "Black":
+      self.rent = [25,50,100,200]
     self.image = image
 
 MedAve = Property('Mediterranean Avenue', "Brown", 2, 10, 30, 90, 160, 250, 30,50, MA)
