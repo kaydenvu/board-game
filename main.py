@@ -69,7 +69,7 @@ propertiesMenu = pygame.image.load("Properties Menu.png")
 X = pygame.image.load("X Button.png")
 left = pygame.image.load("left arrow.png")
 right = pygame.image.load("right arrow.png")
-
+Upgrade = pygame.image.load("Upgradebutton.png")
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
 
@@ -175,9 +175,12 @@ class Button(pygame.sprite.Sprite):
           if tile.property.siteColor == "Utility":
             lastPlayer.money -= tile.property.rent[tile.property.upgrades] * (finalDiceSum)
             tile.property.owner.money +=  tile.property.rent[tile.property.upgrades] * (finalDiceSum)
-          else:
+          elif tile.property.siteColor == "Black":
             lastPlayer.money -= tile.property.rent[tile.property.upgrades]
             tile.property.owner.money += tile.property.rent[tile.property.upgrades]
+          else:
+            lastPlayer.money -= tile.property.rent
+            tile.property.owner.money += tile.property.rent
         self.resetButton()
     if self.actionType == "pay":
       self.draw()
@@ -327,6 +330,12 @@ class Button(pygame.sprite.Sprite):
         self.resetButton()
         gameState = STATE.PROPERTY_MENU
         pageNum += 1
+    if self.actionType == "upgrade":
+      self.draw()
+      if self.clicked and not Button.mouseDown:
+        print("clicked")
+        self.resetButton()
+
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
 for idx, num in enumerate([num6,num7,num8], 6):
@@ -444,6 +453,7 @@ propertiesButton = Button(propertiesButtonImage, V(300,230),0.5,"property menu")
 XButton = Button(X, V(15,15), 0.5, "exit menu")
 leftButton = Button(left, V(0, 450), 0.3, "left")
 rightButton = Button(right, V(450,450), 0.3, "right")
+upgradeButton = Button(Upgrade, V(400,15), 0.5, "upgrade")
 
 rollDoubles = False
 
@@ -553,6 +563,7 @@ def updateBoard():
   elif gameState == STATE.PROPERTY_MENU:
     screen.blit(propertiesMenu, (0,0))
     XButton.update()
+    upgradeButton.update()
     pages= []
     for i in range(0, len(lastPlayer.properties), 4):
       page = []
@@ -569,6 +580,10 @@ def updateBoard():
         x = 75 + (i % 2) * 175
         y = 25 + (i//2) * 225
         screen.blit(pages[pageNum][i].image, V(x, y))
+  elif gameState == STATE.UPGRADE_MENU:
+    
+
+    
     
   pygame.display.update()
   
@@ -583,7 +598,8 @@ class STATE(Enum):
   PLAY_CHOOSE = 3
   CARD = 4
   PROPERTY_MENU = 5
-  END = 6
+  UPGRADE_MENU = 6
+  END = 7
 
 gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
@@ -607,10 +623,10 @@ while GameRunning:
         pygame.display.update()
         pygame.time.wait(500)
         pygame.time.set_timer(rollingDice, 0)
-        diceRolling = False
+        diceRolling = False 
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 6,6
+        #die1.value, die2.value = 2,4
         finalDiceSum = die1.value + die2.value
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
