@@ -72,6 +72,16 @@ right = pygame.image.load("right arrow.png")
 Upgrade = pygame.image.load("Upgradebutton.png")
 
 diePossiblities = [dice1, dice2, dice3, dice4, dice5, dice6]
+MAX_BROWN = 2
+MAX_LBLUE = 3
+MAX_PINK = 3
+MAX_ORANGE = 3
+MAX_RED = 3
+MAX_YELLOW = 3
+MAX_GREEN = 3
+MAX_DBLUE = 2
+MAX_COLORS = {"Brown": MAX_BROWN, "Light Blue":MAX_LBLUE, "Pink": MAX_PINK, "Orange": MAX_ORANGE, "Red":MAX_RED, 
+"Yellow": MAX_YELLOW, "Green":MAX_GREEN, "Dark Blue": MAX_DBLUE}
 
 screenWidth = 500
 screenHeight = 500
@@ -154,6 +164,13 @@ class Button(pygame.sprite.Sprite):
                 property.upgrades = lastPlayer.utilities - 1
               if property.siteColor == "Black":
                 property.upgrades = lastPlayer.railroads -1
+          for i in lastPlayer.properties:
+            if i.siteColor != "Black" and i.siteColor != "Utility": 
+              lastPlayer.colorAmt[i.siteColor] += 1
+              if lastPlayer.colorAmt[i.siteColor] == MAX_COLORS[i.siteColor]:
+                lastPlayer.upColor.append(i.siteColor)
+          print(lastPlayer.upColor)
+
           self.resetButton()
         else:
           Button.showAlert = True
@@ -179,8 +196,8 @@ class Button(pygame.sprite.Sprite):
             lastPlayer.money -= tile.property.rent[tile.property.upgrades]
             tile.property.owner.money += tile.property.rent[tile.property.upgrades]
           else:
-            lastPlayer.money -= tile.property.rent
-            tile.property.owner.money += tile.property.rent
+            lastPlayer.money -= tile.property.rent[tile.property.upgrades]
+            tile.property.owner.money += tile.property.rent[tile.property.upgrades]
         self.resetButton()
     if self.actionType == "pay":
       self.draw()
@@ -335,6 +352,7 @@ class Button(pygame.sprite.Sprite):
       if self.clicked and not Button.mouseDown:
         print("clicked")
         self.resetButton()
+        gameState = STATE.UPGRADE_MENU
 
 for idx, num in enumerate([num2, num3, num4, num5], 2):
   Button(num, V(5 + (idx - 2) * 125 ,100), 0.5, "num players", idx, PlayerNumUI)
@@ -362,6 +380,8 @@ class Player():
     self.hotels = 0
     self.utilities = 0
     self.railroads = 0
+    self.upColor = []
+    self.colorAmt = {"Brown": 0, "Light Blue": 0, "Pink": 0, "Orange":0, "Red":0, "Yellow": 0, "Green":0, "Dark Blue":0}
   def __repr__(self):
     return self.piece.name
 Properties = {
@@ -581,11 +601,9 @@ def updateBoard():
         y = 25 + (i//2) * 225
         screen.blit(pages[pageNum][i].image, V(x, y))
   elif gameState == STATE.UPGRADE_MENU:
-    
-
-    
-    
-  pygame.display.update()
+    screen.blit(propertiesMenu, (0,0))
+    XButton.update()
+      
   
 GameRunning=True
 firstTurn = True
@@ -626,7 +644,7 @@ while GameRunning:
         diceRolling = False 
         rollButton.clicked = False
         firstTurn = False
-        #die1.value, die2.value = 2,4
+        die1.value, die2.value = 3,2
         finalDiceSum = die1.value + die2.value
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
@@ -663,6 +681,8 @@ while GameRunning:
   if gameState == STATE.CARD:
     updateBoard()
   if gameState ==  STATE.PROPERTY_MENU:
+    updateBoard()
+  if gameState ==  STATE.UPGRADE_MENU:
     updateBoard()
   pygame.display.update()
     
