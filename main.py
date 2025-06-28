@@ -169,6 +169,13 @@ class Button(pygame.sprite.Sprite):
               lastPlayer.colorAmt[i.siteColor] += 1
               if lastPlayer.colorAmt[i.siteColor] == MAX_COLORS[i.siteColor]:
                 lastPlayer.upColor.append(i.siteColor)
+                for p in lastPlayer.properties:
+                  if p.siteColor == i.siteColor:
+                    p.upgrades+=1
+                    if i.siteColor in lastPlayer.upProp:
+                      lastPlayer.upProp[i.siteColor].append(p)
+                    else:
+                      lastPlayer.upProp[i.siteColor] = [p]
           print(lastPlayer.upColor)
 
           self.resetButton()
@@ -382,6 +389,7 @@ class Player():
     self.railroads = 0
     self.upColor = []
     self.colorAmt = {"Brown": 0, "Light Blue": 0, "Pink": 0, "Orange":0, "Red":0, "Yellow": 0, "Green":0, "Dark Blue":0}
+    self.upProp = {}
   def __repr__(self):
     return self.piece.name
 Properties = {
@@ -602,6 +610,15 @@ def updateBoard():
         screen.blit(pages[pageNum][i].image, V(x, y))
   elif gameState == STATE.UPGRADE_MENU:
     screen.blit(propertiesMenu, (0,0))
+    drawText("You can upgrade: ", V(250,50))
+    for i in range(len(lastPlayer.upColor)):
+      drawText(str(i+1)+". "+ lastPlayer.upColor[i], V(250,100+i*50))
+    XButton.update()
+  elif gameState == STATE.UPGRADE_PROP:
+    screen.blit(propertiesMenu, (0,0))
+    drawText("You can upgrade: ", V(250,50))
+    for i in range(len(lastPlayer.upProp[colorToUpgrade])):
+      drawText(str(i+1)+". "+ lastPlayer.upProp[colorToUpgrade][i].name, V(250,100+i*50))
     XButton.update()
       
   
@@ -617,7 +634,8 @@ class STATE(Enum):
   CARD = 4
   PROPERTY_MENU = 5
   UPGRADE_MENU = 6
-  END = 7
+  UPGRADE_PROP = 7
+  END = 8
 
 gameState = STATE.START_NUM_PLAYERS
 rollingDice = pygame.USEREVENT + 1
@@ -625,6 +643,7 @@ diceRolling = False
 turn = 0
 pageNum = 0
 finalDiceSum = 0
+colorToUpgrade = None
 
 while GameRunning:
   for event in pygame.event.get():
@@ -632,6 +651,61 @@ while GameRunning:
         Button.mouseDown = False
     if event.type == pygame.QUIT:
       GameRunning = False
+    if event.type == pygame.KEYDOWN:
+      if gameState == STATE.UPGRADE_PROP:
+        if event.key == pygame.K_1 and len(lastPlayer.upProp[colorToUpgrade]) > 0 and lastPlayer.upProp[colorToUpgrade][0].upgrades + 1 < 7:
+           if lastPlayer.money>= lastPlayer.upProp[colorToUpgrade][0].costHouse:
+            lastPlayer.upProp[colorToUpgrade][0].upgrades +=1
+            lastPlayer.money-=lastPlayer.upProp[colorToUpgrade][0].costHouse
+            lastPlayer.upProp[colorToUpgrade].pop(0)
+            if not lastPlayer.upProp[colorToUpgrade]:
+              for p in lastPlayer.properties:
+                if p.siteColor == colorToUpgrade and  p.upgrades < 6:
+                  lastPlayer.upProp[colorToUpgrade].append(p)
+        if event.key == pygame.K_2 and len(lastPlayer.upProp[colorToUpgrade]) > 1 and lastPlayer.upProp[colorToUpgrade][1].upgrades + 1 < 7:
+           if lastPlayer.money>= lastPlayer.upProp[colorToUpgrade][1].costHouse:
+            lastPlayer.upProp[colorToUpgrade][1].upgrades +=1
+            lastPlayer.money-=lastPlayer.upProp[colorToUpgrade][1].costHouse
+            lastPlayer.upProp[colorToUpgrade].pop(1)
+            if not lastPlayer.upProp[colorToUpgrade]:
+              for p in lastPlayer.properties:
+                if p.siteColor == colorToUpgrade and p.upgrades < 6:
+                  lastPlayer.upProp[colorToUpgrade].append(p)
+        if event.key == pygame.K_3 and len(lastPlayer.upProp[colorToUpgrade]) > 2 and lastPlayer.upProp[colorToUpgrade][2].upgrades + 1 < 7:
+           if lastPlayer.money>= lastPlayer.upProp[colorToUpgrade][2].costHouse:
+            lastPlayer.upProp[colorToUpgrade][2].upgrades +=1
+            lastPlayer.money-=lastPlayer.upProp[colorToUpgrade][2].costHouse
+            lastPlayer.upProp[colorToUpgrade].pop(2)
+            if not lastPlayer.upProp[colorToUpgrade]:
+              for p in lastPlayer.properties:
+                if p.siteColor == colorToUpgrade and  p.upgrades < 6:
+                  lastPlayer.upProp[colorToUpgrade].append(p)
+      if gameState == STATE.UPGRADE_MENU:
+        if event.key == pygame.K_1 and len(lastPlayer.upColor) > 0:
+          colorToUpgrade = lastPlayer.upColor[0]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_2 and len(lastPlayer.upColor) > 1:
+          colorToUpgrade = lastPlayer.upColor[1]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_3 and len(lastPlayer.upColor) > 2:
+          colorToUpgrade = lastPlayer.upColor[2]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_4 and len(lastPlayer.upColor) > 3:
+          colorToUpgrade = lastPlayer.upColor[3]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_5 and len(lastPlayer.upColor) > 4:
+          colorToUpgrade = lastPlayer.upColor[4]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_6 and len(lastPlayer.upColor) > 5:
+          colorToUpgrade = lastPlayer.upColor[5]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_7 and len(lastPlayer.upColor) > 6:
+          colorToUpgrade = lastPlayer.upColor[6]
+          gameState = STATE.UPGRADE_PROP
+        if event.key == pygame.K_8 and len(lastPlayer.upColor) > 7:
+          colorToUpgrade = lastPlayer.upColor[7]
+          gameState = STATE.UPGRADE_PROP
+      
     if event.type == rollingDice:
       die1.roll()
       die2.roll() 
@@ -644,7 +718,7 @@ while GameRunning:
         diceRolling = False 
         rollButton.clicked = False
         firstTurn = False
-        die1.value, die2.value = 3,2
+        #die1.value, die2.value = 0,1
         finalDiceSum = die1.value + die2.value
         move(player, die1.value, die2.value)
         print(player.piece.name, die1.value, die2.value, board[player.position].name)
@@ -683,6 +757,8 @@ while GameRunning:
   if gameState ==  STATE.PROPERTY_MENU:
     updateBoard()
   if gameState ==  STATE.UPGRADE_MENU:
+    updateBoard()
+  if gameState ==  STATE.UPGRADE_PROP:
     updateBoard()
   pygame.display.update()
     
